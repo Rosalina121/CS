@@ -1,0 +1,65 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using System.IO.Ports;
+using System.Threading;
+
+namespace Lab1
+{
+    class Program
+    {
+        static bool cont;
+        static SerialPort port;
+        static void Main(string[] args)
+        {
+
+            port = new SerialPort();
+            port.PortName = "COM1";
+            port.BaudRate = 9600;
+            port.Parity = Parity.None;
+            port.DataBits = 8;
+            port.StopBits = StopBits.One;
+
+            Thread thread = new Thread(Read);
+            port.ReadTimeout = 500;
+            port.WriteTimeout = 500;
+            string message;
+
+            port.Open();
+            cont = true;
+            thread.Start();
+           // port.Write("ATS0=1\r");
+            while (cont)
+            {
+                message = Console.ReadLine();
+
+                port.WriteLine(message);//String.Format("<{0}>: {1}", port.PortName, message));
+                Console.WriteLine(String.Format("<{0}>: {1}", port.PortName, message));
+                
+            }
+            thread.Join();
+            port.Close();
+            Console.ReadKey();
+        }
+
+        public static void Read()
+        {
+            while (cont)
+            {
+                try
+                {
+                    string message = port.ReadLine();
+                    Console.WriteLine(message);
+                    //if (message.Contains("RING"))
+                      //  port.WriteLine("ATA\r");
+                }
+                catch (TimeoutException)
+                {
+
+                }
+            }
+        }
+    }
+}
